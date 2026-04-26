@@ -28,4 +28,12 @@ We can now check the size and start and end addresses of each sections from the 
 riscv-none-elf-objdump -h firmware.elf  
 riscv-none-elf-objdump -d firmware.elf | head -n 20
 
+NOTE: Here in the linker.ld we dont have a separate FLASH (Non-volatile) and RAM (Volatile) regions.
+This is designed so that the code on the device where the code is flashed, is removed from  the chip once power is lost.
+
+If we were to write code to be "burned" onto the chip permanently using a JTAG programmer, then our startup.S would also 
+need to be much more complex to handle the migration of the .data section from Flash to RAM. 
+
+We leave all those complex things for future endeavors.
+
 How to Flash the .BIN finally generated is something we will find in the README inside the direcotry "Executables_Post_Linking_and_Assembling"

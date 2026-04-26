@@ -43,3 +43,19 @@ Crucial: If it says "command not found," check that your path in .bashrc matches
 Step 3: Make sure you have Tera Term software installed as well on your system
 This is the software which will be used to flash the .BIN finally onto the HW board
 We could very well write a python script to do so, but for a beginning that would be way too much
+
+
+Step 4: To flash the .Bin executable onto the ARIESV3.0 board, connect the board to the laptop (USB C to C works well)
+Then open Tera Term, in the Dialogue Box, select "Serial" and then select 
+"COM PORT" other than Standard Serial Over Bluetooth... 
+Once selected, go to "Setup" -> Serial Port -> Baud rate -> select 115200  (thats what ARIESV3.0 uses for UART)
+
+Now you would see VEGABOARD default program running on the Tera Term Terminal - maybe printing Hello World or something.
+Remove the Jumper, press the reset button, you would now see "ccccc...." being written on the Tera Term terminal, indicating \
+that the UART is ready for .BIN flush to the HW.
+
+Go to File -> Transfer -> XMOMDEM -> send -> Browse to select the firmware.bin file 
+
+This will burn the code on the HW, once done, press ENTER. You would see the main.c code running!
+
+Cheers

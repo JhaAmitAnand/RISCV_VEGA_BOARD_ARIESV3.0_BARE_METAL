@@ -1,0 +1,234 @@
+Bare Metal Programming Needed Tools and Softwares/Essentials : 
+
+Part 1: 
+One needs a tool that runs on Windows but speaks RISC-V.
+Download: Get the xPack GNU RISC-V Embedded GCC. It’s the most stable "bare-metal" toolchain for Windows
+
+https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases
+
+Download the .zip for win32-x64.
+
+Extract: Unzip it to C:\riscv_gcc.
+
+Link to Git Bash:
+
+Open Git Bash and run:  (Actually after unzipping, make sure to go to the bin directory and just paste its path below)
+echo 'export PATH=$PATH:C:\riscv_gcc\xpack-riscv-none-elf-gcc-15.2.0-1-win32-x64\xpack-riscv-none-elf-gcc-15.2.0-1\bin' >> ~/.bashrc
+
+But its better to cut the entire content and paste it inside riscv_gcc - to have smaller path length (in windows path length issues are common)
+
+echo '...'       : Takes the text inside the single quotes and prepares to "say" or output it.
+export PATH=XYZ  : Tells the system you want to update the PATH variable, which is the list of directories the computer searches through when you run a command.
+$PATH:/c/riscv.. : This keeps the current PATH list (that's the $PATH part) and adds a new folder to the end of it (separated by a colon).
+>>               : This is the append operator. It takes the output and adds it to the very end of a file without deleting what's already there.~/.bashrc.
+
+.bashrc is a hidden script file in the home directory that runs every time you open a new terminal window.
+
+In Plain EnglishBy running this command, you are telling the system: "Hey, every time I start a new terminal session, 
+please add the folder /c/riscv-gcc/bin to my list of known program locations. 
+That way, if we type riscv64-unknown-elf-gcc, OS knows where to find it."
+
+Restart the terminal and type: riscv-none-elf-gcc --version.
+
+Crucial: If it says "command not found," check that path in .bashrc matches the bin folder location exactly.
+
+
+Part 2: 
+To create the linker.ld file
+To create the startup.S file 
+To create the main.C file
+
+Now make the .o files for each of the files above using commands below
+
+NOTE: If there is any Smart App Control or Windows Security feature enabled - the .o might not be generated 
+To get pass this - disable the Smart App Control - they do not let cross compilers run
+
+riscv-none-elf-gcc -c -march=rv32im -mabi=ilp32 startup.s -o startup.o
+
+riscv-none-elf-gcc -c -march=rv32im -mabi=ilp32 -ffreestanding main.c -o main.o
+
+Part 3:
+Now we need to get the Linking Done 
+Use the linker.ld to create the ELF file. This maps the code to the actual SRAM/Flash addresses of the VEGA processor.
+
+riscv-none-elf-gcc -march=rv32im -mabi=ilp32 -O0 -ffreestanding -mno-relax -nostartfiles -nodefaultlibs -nostdlib -T linker.ld startup.S main.c -o firmware.elf -lgcc
+
+Verify the OBJECT DUMP - which gives an idea of SIZE of various sections
+riscv-none-elf-objdump -h firmware.elf
+
+Part 4:
+We now need to create the Flashable (executable file) Binary file
+This is because the ARIES bootloader needs a raw .bin file, not an ELF.
+
+riscv-none-elf-objcopy -O binary firmware.elf firmware.bin
+
+
+Part 5: 
+This is where we would need a new software (unless we want to write the script) to flash the .bin executable on the HW board
+
+
+
+Main steps in Crux:
+
+# 1. Assemble
+riscv-none-elf-gcc -c -march=rv32im -mabi=ilp32 startup.S -o startup.o
+
+
+# 2. Compile (Added -fno-stack-protector to prevent hidden library calls)
+riscv-none-elf-gcc -c -march=rv32im -mabi=ilp32 -ffreestanding -O0 main.c -o main.o
+
+
+# 3. Link (Removed the flags causing the error)
+riscv-none-elf-gcc -march=rv32im -mabi=ilp32 -O0 -ffreestanding -mno-relax -nostartfiles -nodefaultlibs -nostdlib -T linker.ld startup.S main.c -o firmware.elf -lgcc
+
+
+# 4. Create Binary
+riscv-none-elf-objcopy -O binary -S firmware.elf firmware.bin
+
+
+
+# Checks:
+riscv-none-elf-nm firmware.elf
+riscv-none-elf-objdump -h firmware.elf  
+riscv-none-elf-objdump -d firmware.elf | head -n 20
+
+
+
+ARIES ET1031 VEGABOARD DOC
+
+
+https://vegaprocessors.in/overview.php
+https://vegaprocessors.in/vega-et1031.php
+
+
+/* ========================================================================================
+ *          ET1031 VEGA BOARD ARIES V3.0 MEMORY LAYOUT
+ *
+ *   ------------------------------------------------------------------ 
+ *    Region   |        Address Range       |          Description
+ *   ------------------------------------------------------------------
+ *    SRAM	   |  0x80000000 - 0x8003FFFF	|   256KB Internal RAM for code and data
+ *             |                            |
+ *    Flash	   |  0x20000000 - 0x201FFFFF	|   2MB External SPI Flash (via QSPI)
+ *             |                            |
+ *    UART0	   |    0x10000100	            |   Primary Serial port for printf debugging
+ *             |                            |
+ *    GPIO	   |    0x10080000              |   32 General Purpose I/Os
+ * ========================================================================================= */
+ 
+THR (Transmit Holding Register): Base + 0x00. Write characters here to send data.  
+
+LSR (Line Status Register): Base + 0x14. Check bit 5 (THRE) to see if the transmitter is ready for the next byte
+
+GPIO_DATA: Base + 0x00
+
+GPIO_DIRECTION: Base + 0x04. Set a bit to 1 to make the pin an output
+
+
+ADDRESS MAP                   MEMORY SECTION & GROWTH
+--------------------------    0x80040000 (Stack Top / RAM End)
+|                        |          |
+|         STACK          |          |  |  (DOWNWARDS)
+|                        |          |  v  
+--------------------------          |
+|      COLLISION GAP     |          |  "The Danger Zone"
+--------------------------          |
+|      HEAP / MEM        |          |  ^  (UPWARDS)
+--------------------------          |  |
+|    .bss / .data        |          |  ^  (UPWARDS)
+--------------------------          |  |
+|         .text          |          |  ^  (UPWARDS)
+--------------------------    0x80000000 (SSRAM Base / .text.entry)
+|                        |
+|      RESERVED GAP      |          (Massive address hole)
+|                        |
+--------------------------    0x201FFFFF (Flash End)
+|      QSPI FLASH        |          (Program Storage)
+--------------------------    0x20000000 (Flash Base)
+|                        |
+|      RESERVED GAP      |          (Large Gap)
+|                        |
+--------------------------    0x100FFFFF (Peripheral End)
+|   UART/GPIO/SPI MMIO   |          (Hardware Control)
+--------------------------    0x10000000 (Peripheral Base)
+|                        |
+|      RESERVED GAP      |          (Gap)
+|                        |
+--------------------------    0x0200FFFF (CLINT End)
+|   TIMER / INTERRUPTS   |          (Core Local Interruptor)
+--------------------------    0x02000000 (CLINT Base)
+|                        |
+|      RESERVED GAP      |          (Gap)
+|                        |
+--------------------------    0x00101FFF (Boot ROM End)
+|       BOOT ROM         |          (Initial Boot Sequence)
+--------------------------    0x00100000 (Boot ROM Base)
+
+
+i) Hardware Reserved Gaps (The "Address Holes")These are gaps in the physical address map of the THEJAS32 SoC.
+The RISC-V 32-bit address space is huge (2^{32} bytes), but the physical components (Flash, RAM, Peripherals)
+only occupy small slices of it. Where they are: Between the Peripherals (0x10000000) and the Flash (0x20000000),
+or between the Flash and the SSRAM (0x80000000). What happens if you access them: If the code tries to read or 
+write to an address inside a Reserved Gap, the hardware will trigger a Load/Store Access Fault. 
+The CPU literally doesn't have a physical wire connected to those addresses.
+
+ii) The Software "Collision Gap" (The Danger Zone)This is the most critical gap for you to manage in the code. 
+It is the empty space inside the SSRAM that sits between the data and the stack.Location: It is the space between
+the top of the Heap/BSS (growing UP) and the bottom of the Stack (growing DOWN). The Purpose: This gap acts as a "buffer."
+As long as there is a gap, the program is safe. The "Crash":If you have too many nested function calls or large 
+local variables, the Stack grows down and "eats" the gap. If you define too many global arrays or use a large heap, 
+the Data sections grow up and "eat" the gap.When the gap disappears and the sections overlap, it is called a Stack Overflow. 
+the stack will start overwriting the variables, or the variables will overwrite the stack's return addresses, 
+leading to a system crash or unpredictable behavior.
+
+
+NOTE: Even though the HW definition and official documents show that the RAM starts at 0x80000000, which it must, thats
+      not where we program the stack start in the linker. Thast because the bootloader sitting in the chip has a 
+      different IRAM (TCM) address as the RAM. That is what is used in the Linker (0x200000). Thats shown below. This makes \
+      the above memory MAP a mere knowledge rather than a very useful information.
+      
+      
+ +-----------------------------------------------------------------------------+
+ |           VEGA Series of Microprocessors Developed By C-DAC, INDIA          |
+ |     Microprocessor Development Programme, Funded by MeitY, Govt. of India   |
+ +-----------------------------------------------------------------------------+
+ | Bootloader, ver 1.0.0 [  (hdg@cdac_tvm) Tue Dec  15 16:50:32 IST 2020 #135] |
+ |                                                                             |
+ |  ___    _________________________          ISA  : RISC-V [RV32IM]           |
+ |  __ |  / /__  ____/_  ____/__    |                                          |
+ |  __ | / /__  __/  _  / __ __  /| |         CPU  : VEGA ET1031               |
+ |  __ |/ / _  /___  / /_/ / _  ___ |                                          |
+ |  _____/  /_____/  \____/  /_/  |_|         SoC  : THEJAS32                  |
+ +---------------------------------------+-------------------------------------+
+ |         www.vegaprocessors.in         |             vega@cdac.in            |
+ +---------------------------------------+-------------------------------------+
+
+ Transfer mode  : UART XMODEM
+
+ IRAM           : [0x200000 - 0x23E7FF] [250 KB]
+ 
+ 
+
+The most critical part of evaluating the linker is ensuring the following inequality remains true:
+(\text{Size of .text}) + (\text{Size of .data}) + (\text{Size of .bss}) + (\text{Size of Stack}) < 256\text{ KB}
+
+In the linker script, it is a "best practice" to explicitly define a stack size so the linker can check the gap for you. 
+For a standard bare-metal project on this board, 2KB to 4KB is often sufficient unless you are using deep recursion.
+
+
+/* Example: Defining a 4KB Stack */
+_stack_size = 0x1000; 
+
+_stack_top    = ORIGIN(RAM) + LENGTH(RAM);
+_stack_bottom = _stack_top - _stack_size;
+
+
+
+Location Counter (represented by the symbol .) is a dynamic pointer managed by the linker.
+As the linker packs the compiled .o files into the section, it moves that pointer forward. 
+When we assign it to a variable like _data_end, it captures whatever the address happens to be at that exact moment. 
+To see the actual addresses:
+After we compile the code, look for a file named output.map (or use riscv64-unknown-elf-nm the_program.elf). 
+It will show the exact hex values the linker assigned to _text_end, _data_end, etc., based on our real code size
+
+

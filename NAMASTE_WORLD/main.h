@@ -27,6 +27,9 @@
 /* Defining Address to the LSR (LINE STATUS REGISTER) */
 #define UART_LSR                      (*(volatile unsigned int*)(UART0_BASE + 0x14))
 
+/* Transmit Holding Register Empty */
+#define UART_LSR_THRE                 0x20
+
 
 /* Each NOP takes one cycle. Its a valid INSTRUCTION for compiler */
 #define DO_NOTHING_CONSUME_A_CYCLE    __asm__ volatile ("nop")

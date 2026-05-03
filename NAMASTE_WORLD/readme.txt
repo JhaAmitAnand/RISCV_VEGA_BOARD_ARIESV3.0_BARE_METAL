@@ -12,7 +12,7 @@ riscv-none-elf-gcc -c -march=rv32im -mabi=ilp32 startup.S -o startup.o
 riscv-none-elf-gcc -c -march=rv32im -mabi=ilp32 -ffreestanding -O0 main.c -o main.o
 
 # 3. Link (Removed the flags causing the error)
-riscv-none-elf-ld -T linker.ld --undefined=_start startup.o main.o -o firmware.elf
+riscv-none-elf-gcc -march=rv32im -mabi=ilp32 -O0 -ffreestanding -mno-relax -nostartfiles -nodefaultlibs -nostdlib -T linker.ld startup.S main.c -o firmware.elf -lgcc
 
 # 4. Create Binary
 riscv-none-elf-objcopy -O binary -S firmware.elf firmware.bin
@@ -25,6 +25,7 @@ Linking, assembling etc.
 
 We can now check the size and start and end addresses of each sections from the linker
 # 5. Checks:
+riscv-none-elf-nm firmware.elf
 riscv-none-elf-objdump -h firmware.elf  
 riscv-none-elf-objdump -d firmware.elf | head -n 20
 

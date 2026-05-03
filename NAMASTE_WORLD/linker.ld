@@ -29,6 +29,7 @@ SECTIONS
         KEEP(*(.text.entry))
         *(.text*)
         *(.rodata*)
+        . = ALIGN(4);
         _text_end = .;
     } > RAM
 
@@ -38,6 +39,7 @@ SECTIONS
     {
         _data_start = .;
         *(.data*)
+        . = ALIGN(16);
         _data_end = .;
     } > RAM
 
@@ -46,6 +48,7 @@ SECTIONS
         _bss_start = .;
         *(.bss*)
         *(COMMON)
+        . = ALIGN(16);
         _bss_end = .;
     } > RAM
 

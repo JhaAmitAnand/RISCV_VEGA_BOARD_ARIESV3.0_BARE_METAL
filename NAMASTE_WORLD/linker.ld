@@ -12,44 +12,45 @@
  *
  * ===================================================== */
 
-
 MEMORY
 {
-    /* Based on THEJAS32 Hardware Specs: SRAM starts at 0x80000000 */
-    RAM (rwx) : ORIGIN = 0x80000000, LENGTH = 256K
+    /* Updated to match your hardware output: 0x200000 */
+    RAM (rwx) : ORIGIN = 0x200000, LENGTH = 250K
 }
-
 
 SECTIONS
 {
     .text :
     {
         _text_start = .;
-        KEEP(*(.text.entry))
+        KEEP(*(.text.entry)) 
         *(.text*)
-        *(.rodata*)
+        *(.rodata*)    /* Strings live here */
+        *(.srodata*)
+        . = ALIGN(4);
         _text_end = .;
     } > RAM
 
-    /* RISC-V often performs better (and sometimes requires) that data sections
-     start on a 4-byte or 8-byte boundary so the alignment is good to have */
-    .data : ALIGN(4)
+    .data : ALIGN(16)
     {
         _data_start = .;
+        __global_pointer$ = . + 0x800; /* */
         *(.data*)
+        *(.sdata*)
+        . = ALIGN(16);
         _data_end = .;
     } > RAM
 
-    .bss :
+    .bss : ALIGN(16)
     {
         _bss_start = .;
         *(.bss*)
         *(COMMON)
+        . = ALIGN(16);
         _bss_end = .;
     } > RAM
 
-    /* Stack starts at the very end of the 256KB SRAM. Also since RISC-V calling convention
-     requires the stack pointer to be 16-byte aligned at all times, the alignment 
-     below is a good to have */
+    /* Set stack top to the end of the IRAM range seen in your image
+    _stack_top = 0x23E7F0; */
     _stack_top = ALIGN(ORIGIN(RAM) + LENGTH(RAM), 16);
 }

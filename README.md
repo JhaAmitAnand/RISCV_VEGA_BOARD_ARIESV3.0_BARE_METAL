@@ -1,4 +1,4 @@
-# VEGA_BOARD_ARIESV3.0_BARE_METAL
+# RISCV_VEGA_BOARD_ARIESV3.0_BARE_METAL
 
 Namaste ! This is a BASIC - BARE MINIMUM - BARE METAL PROGRAMMING
 A starting point - to pivot around programming real HW 

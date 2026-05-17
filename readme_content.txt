@@ -1,4 +1,12 @@
-The first project "PRINT NAMASTE WORLD" AIMS at : 
+------------------------------------------------------------------------------------------------
+           A HANDS ON FOR BARE METAL + C + EMBEDDED BASICS + OS LEVEL BASICS
+           
+           Author: Amit Anand Jha
+           Place : Mithila, Bihar, Bharat
+           Status: In Progress, Ongoing
+------------------------------------------------------------------------------------------------
+
+The first project : A Vanilla project "PRINT NAMASTE WORLD" AIMS at : 
          0)     STARTING TO LEARN BARE METAL PROGRAMMING
          i)     Understanding the BASIC memory map and pins in the ARIES VEGABOARD V3.0
          ii)    Introduction to basic linker file and how to write it 
@@ -12,6 +20,15 @@ The second project "USER_DEFINED_STD_APIs" AIMS at :
          i)     How to think at Hardware level while doing mathematical operations like calculating factorials : things we take for granted while using libraries
          ii)    Writing our own print functions and scan functions for strings alone (we'll later try to extend it to generic print and scan)
          iii)   The importance and evident use of "static" keyword and havoc it can create if missing
-         iv)    Use of volatile keyword and its effect if not used. Difference between Stack and RAM
+         iv)    Use of volatile keyword and its effect if not used. Difference between Stack and RAM for compiler
          v)     Use of Variadic MACROS to implement small functions
-         vi)    Try to do 64 bit operations on 32 bit processor and write driver for it
+         vi)    "__builtin_va_list" & family compiler keyword which are scratch level knowledge of C to write logic for things where we need not include any standard headers
+         vii)   Doing few 64 bit operations : like Add, Multiply etc, on 32 bit processor and write driver level code for it
+
+
+The third project "MULTI_THREADED_SYSTEMS" AIMS at :
+
+
+
+
+The fourth project "COMMON_DATA_STRUCTURES" AIMS at :

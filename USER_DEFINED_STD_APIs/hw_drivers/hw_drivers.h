@@ -84,19 +84,62 @@
 #define MAX_NUM_DIGITS_IN_64_BITS          20   // (0-18446744073709551615)
 
 
+// Define the value of NULL which would be used to initialize the pointers safely
+#define NULL                               ((void*)0xFFFFFFFF)
+
+
+/* ====================================================================
+ *                              ENUMS
+ * ==================================================================== */
+typedef enum
+{
+	PRINT_CHARACTER = 'c',
+	PRINT_STRING = 's',
+
+	PRINT_POSITIVE_DECIMAL_NUMBER = 'u',
+	PRINT_UNSIGNED_DECIMAL_NUMBER = PRINT_POSITIVE_DECIMAL_NUMBER,
+
+	PRINT_POSITIVE_HEX_NUMBER = 'x',
+	PRINT_UNSIGNED_HEX_NUMBER = PRINT_POSITIVE_HEX_NUMBER,
+
+	PRINT_POSITIVE_OCT_NUMBER = 'o',
+	PRINT_UNSIGNED_OCT_NUMBER = PRINT_POSITIVE_OCT_NUMBER,
+
+	PRINT_POSITIVE_BINARY_NUMBER = 'b',
+	PRINT_UNSIGNED_BINARY_NUMBER = PRINT_POSITIVE_BINARY_NUMBER,
+
+	PRINT_NEGATIVE_DECIMAL_NUMBER = 'i',
+	PRINT_SIGNED_DECIMAL_NUMBER = PRINT_NEGATIVE_DECIMAL_NUMBER,
+
+	PRINT_NEGATIVE_HEX_NUMBER = 'x',
+	PRINT_SIGNED_HEX_NUMBER = PRINT_NEGATIVE_HEX_NUMBER,
+
+	PRINT_NEGATIVE_OCT_NUMBER = 'o',
+	PRINT_SIGNED_OCT_NUMBER = PRINT_NEGATIVE_OCT_NUMBER,
+
+	PRINT_NEGATIVE_BINARY_NUMBER = 'b',
+	PRINT_SIGNED_BINARY_NUMBER = PRINT_NEGATIVE_BINARY_NUMBER,
+
+	PRINT_FRACTION = 'f'
+}print_format_specifier_type_e;
+
+
 
 /* ====================================================================
  *                            TYPEDEFS
  * ==================================================================== */
 
 /* Manual type definitions to avoid stdint.h dependency */
-typedef unsigned char       uint8_t;          // 8-bit width integer (Range: 0 to 255)
-typedef unsigned char       byte_t;
+typedef unsigned char       uint8_t;          // 8-bit width unsigned integer (Range: 0 to 255)
+typedef signed char         int8_t;          // 7-bit width signed integer and 1 bit (MSB) for sign (-127 to 0)
+
+
 
 /* 16-bit width integer (Range: 0 to 65,535) : takes 1 LOAD SHIFT STORE cycle
  * Needs to be 2 BYTES aligned. It is precisely one single 16 bit space
  */
 typedef unsigned short      uint16_t1;
+typedef signed short        int16_t1;
 
 /* 16-bit width integer (Range: 0 to 65,535) : takes 2 LOAD SHIFT STORE cycle
  * Need not be 2 BYTES aligned. It is actually two 8 bits space combined to form
@@ -117,11 +160,15 @@ typedef uint16_t2           halfword_t2;
 
 
 typedef unsigned int        uint32_t;         // 32-bit width  (uses a single register)
+typedef signed int          int32_t;          // 31-bit width integer with MSB bit as sign bit
+
 typedef unsigned long long  uint64_t;         // 64-bit width  (uses register pairs)
+typedef signed long long    int_64_t;
 
 
 /* A word/halfword is HW architecture dependent definition. On ARIESV3.0 data bus is
  * 32 bits. So a word is 32 bits and a Double Word (dword) is 64 bits */
+typedef unsigned char       byte_t;
 typedef unsigned int        word_t;           // 32-bit width  (uses a single register)
 typedef unsigned long long  dword_t;          // 64-bit width  (uses register pairs)
 
@@ -156,6 +203,10 @@ void uart_putc(char c);
 void print_string(const char* s);
 uint32_t atoui(const char* s);
 char* uart_scan_uint(void);
+
+void uart_custom_print(const char *format, ...);
+void print_vega_startup_design();
+
 
 
 #endif /* HW_DRIVERS */

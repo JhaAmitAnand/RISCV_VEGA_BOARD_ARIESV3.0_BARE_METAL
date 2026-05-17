@@ -23,12 +23,34 @@
 #include "hw_drivers.h"
 
 
+
+/* ====================================================================
+ *                              ENUMS
+ * ==================================================================== */
+typedef enum
+{
+	ADD,
+	SUBTRACT,
+	MULTIPLY,
+	DIVIDE,
+	MODULO,
+	FACTORIAL,
+	ABSOLUTE,
+	NO_OP
+}mathematical_op_e;
+
+
 /* ====================================================================
  *                         Function Declarations
  * ==================================================================== */
 
-void print_dec64(uint64_t n);
+void print_uint64(uint64_t n);
+void print_uint32(uint32_t n);
+void print_uint16(uint16_t1 n);
+
 uint64_t factorial_64(uint32_t n);
+
+void mathematical_arithmetic_operartors(uint32_t num);
 
 
 #endif /* _64_BITS_MATHS_H */

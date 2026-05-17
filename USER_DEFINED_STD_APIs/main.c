@@ -19,24 +19,23 @@
 
 /* ====================================================================
  *                         MAIN STARTS HERE
+ *               A Single Thread - one Software core Demo
  * ==================================================================== */
 
 int main()
 {
-
-	NEXT_XLINE(2);
-    print_string("--- VEGA 64-bit Engine is working as Expected ---");
-    NEXT_XLINE(2);
-    print_string("Note: Max input is 20 for 64-bit results");
-    NEXT_XLINE(2);
+	print_vega_startup_design();
 
     while (1)
     {
-        print_string("Enter Number: ");
+        print_string("Choose the operation you want to perform and Enter the corresponding number\r\n\r\n");
+        uart_custom_print("%u> Add \r\n%u> Subtract  \r\n%u> Multiply \r\n%u> Divide \r\n%u> Calculate Factorial \r\n%u> Exit\r\n\r\n",
+        		ADD, SUBTRACT, MULTIPLY, DIVIDE, FACTORIAL, NO_OP);
 
         char* input_buf_ptr = uart_scan_uint();
 
-        print_string("\n");
+        print_string("\r\n");
+        NEXT_XLINE(1);
 
         /* If the User Input is not a NULL string
          * means there are more than one character in User Input
@@ -46,19 +45,23 @@ int main()
         	// Convert the input character string to number
             uint32_t num = atoui(input_buf_ptr);
 
-            if (num > 20)
-            {
-                print_string("Error: Number greater than 20 overflows even 64-bit registers\r\n");
-            }
-            else
-            {
-                uint64_t result = factorial_64(num);
-                print_string("Result: ");
-                print_dec64(result);
-                NEXT_XLINE(1);
-            }
+            mathematical_arithmetic_operartors(num);
+
         }
         NEXT_XLINE(1);
+
+        // Testing the full usage of uart_custom_print API
+        uint32_t num_loops = 1;
+        uint32_t fact_num = 4;
+        int32_t signed_int = -10;
+
+        uint64_t large_factorial = factorial_64(fact_num);
+        char status_index = 'A';
+
+
+        // Fully generic logging engine execution
+        uart_custom_print("Checking Custom print API : System Status[%c] = %s | Core Loop Count: %u | Factorial(%u): %lu  |  Signed Number = %i\r\n\n",
+                          status_index, "VEGA BOARD SYS UP", num_loops, fact_num, large_factorial, signed_int);
     }
 
     return 0;

@@ -4,8 +4,7 @@
  * File Type   : Source File (C)
  * File Author : Amit Anand Jha
  *
- * File Usage  : This is where the linker comes to pick the 'main'
- * function
+ * File Usage  : This is where the drivers for the VEGA board is defined
  * ==================================================================== */
 
 /* ====================================================================
